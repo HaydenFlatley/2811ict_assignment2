@@ -6,7 +6,7 @@
 module.exports = function(){
     this.data;
 
-    this.findUser = function(username, password){
+    this.findUserLogin = function(username, password){
         let match = false;
         let users = data.users;
         for(let i = 0; i < users.length; i++){
@@ -17,6 +17,17 @@ module.exports = function(){
                     console.log("wrong password");
                 }
                 
+            }
+        }
+        return match;
+    }
+
+    this.findUser = function(username){
+        let match = false;
+        let users = data.users;
+        for(let i = 0; i < users.length; i++){
+            if(users[i].username == username){
+                match = users[i];
             }
         }
         return match;

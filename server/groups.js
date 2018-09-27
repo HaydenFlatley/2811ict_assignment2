@@ -68,11 +68,14 @@ module.exports = function(){
 
     // Get all the channels a user has access for a given group and role
     this.getChannels = function(username, group, role){
-        channels = [];
+        let channels = [];
+        console.log("GROUP NAME : "+ group);
         // Go through all the channels
         for(let i = 0; i < data.channels.length; i++){
+            //remove later
             // Check to see if the channel matches the current group
-            if(data.channels[i].group == group.name){
+            if(data.channels[i].group == group){
+                //channels.push(data.channels[i]);
                 if(role >= 2 || group.role >= 1){
                     channels.push(data.channels[i]);
                 } else {
@@ -87,7 +90,7 @@ module.exports = function(){
             }
         }
 
-
+        console.log(channels);
         return channels;
     }
     return this;

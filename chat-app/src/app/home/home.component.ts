@@ -13,7 +13,8 @@ export class HomeComponent implements OnInit {
   public selectedChannel;
   public groups = [];
   public channels = [];
-  public newGroupName:String
+  public newGroupName:String;
+  public newChannelName:String;
 
   constructor(private router: Router, private _groupService:GroupService) { }
 
@@ -42,6 +43,21 @@ export class HomeComponent implements OnInit {
       data => { 
         console.log(data);
         this.getGroups();
+
+      },
+      error => {
+        console.error(error);
+      }
+    )
+  }
+
+  createChannel(event){
+    event.preventDefault();
+    let data = {'newChannelName': this.newChannelName, 'groupName': this.selectedGroup.name};
+    this._groupService.createChannel(data).subscribe(
+      data => { 
+        console.log(data);
+        this.getChannels(this.selectedGroup.name);
       },
       error => {
         console.error(error);
@@ -75,6 +91,23 @@ export class HomeComponent implements OnInit {
     )
   }
 
+  getChannels(groupName){
+    let data = {
+      'username': JSON.parse(sessionStorage.getItem('user')).username,
+      'group': this.selectedGroup.name
+    }
+    this._groupService.getChannels(data).subscribe(
+      d=>{
+        console.log('getChannels()');
+        console.log(d);
+        this.channels = d['channels'];
+      }, 
+      error => {
+        console.error(error);
+      }
+    )
+  }
+
   logout(){
     sessionStorage.clear();
     this.router.navigate(['/login']);
@@ -82,18 +115,18 @@ export class HomeComponent implements OnInit {
 
   // Determine which group is currently selected and pass onto the child panel
   openGroup(name){
-    console.log(name);
     for(let i = 0; i < this.groups.length; i++){
       if(this.groups[i].name == name){
         this.selectedGroup = this.groups[i];
       }
     }
-    this.channels = this.selectedGroup.channels;
+    this.getChannels(this.selectedGroup.name);
   }
 
 
   // Responsible for handling the event call by the child component
   channelChangedHandler(name){
+
     let found:boolean = false;
     for(let i = 0; i < this.channels.length; i++){
       if(this.channels[i].name == name){
@@ -103,8 +136,5 @@ export class HomeComponent implements OnInit {
     }
     return found;
   }
-  getChannels(groupName){
-    let channels = [];
-    return channels;
-  }
+  
 }
