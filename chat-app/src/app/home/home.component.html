@@ -72,6 +72,15 @@
 
             <!-- List of Channels -->
             <app-channels [channels]=channels [group]=selectedGroup (channelChanged)="channelChangedHandler($event)"></app-channels>
+
+            <div *ngIf="selectedGroup.role == 2" class="card-footer text-muted">
+              <div class="form-inline" >
+                <form (submit)="createUser($event)">
+                <input class="form-control" name="newUserName" style="width:calc(100%)" placeholder="New User" type="text" [(ngModel)]="newUserName">
+                <button class="btn btn-primary" style="width:100px">Add User</button>
+                </form>
+              </div>
+            </div>
           </div>
         </div> 
       </div>
@@ -91,5 +100,9 @@
             </p>
         </ng-container>
       </div>
+
+
     </div>
+      
+
 </div>

@@ -3,10 +3,22 @@
 // groups and channels according to the user's 
 // responsibilities
 // ============================================
-module.exports = function(){
+module.exports = function(MongoClient, dbURL){
+    this.MongoClient = MongoClient;
+    this.dbURL = dbURL;
     this.username;
     this.data;
     
+    this.getData = function(){
+        this.MongoClient.connect(this.dbURL, { useNewUrlParser: true }, function(err, db){
+        console.log("IN HERE!!");
+        let dbo = db.db("chat");
+        dbo.collection("groups").find({}).toArray(function(err, result) {
+            console.log("GROUPYGRPUU", result);
+            this.data = result;
+         });
+        });
+    }
     // Find and delete a group by matching groupName to available data in this.data
     this.deleteGroup = function(groupName){
         let found = false;
@@ -28,40 +40,40 @@ module.exports = function(){
 
         if(role == 2){
             // Just return every group and every channel
-            for(let i = 0; i < data.groups.length; i++){
-                let group = data.groups[i];
-                group.channels = this.getChannels(username, group, role);
+            for(let i = 0; i < data.length; i++){
+                let group = data[i];
+                group.channels = this.getChannels(username, group.group, role);
                 group.role = 2;
                 groups.push(group);
             }
-        } else {   
-            // Check for group admin
-            for(let i = 0; i < data.groups.length; i++){
-                let admins = data.groups[i].admins;
-                for(let j = 0; j < admins.length; j++){
-                    if(username == admins[j]){
-                        data.groups[i].role = 1;
-                        groups.push(data.groups[i]);
-                    }
-                }
-            }
+        // } else {   
+        //     // Check for group admin
+        //     for(let i = 0; i < data.length; i++){
+        //         let admins = data[i].admins;
+        //         for(let j = 0; j < admins.length; j++){
+        //             if(username == admins[j]){
+        //                 data[i].role = 1;
+        //                 groups.push(data[i]);
+        //             }
+        //         }
+        //     }
 
-            // Check for membership
-            for(let i = 0; i < data.groups.length; i++){
-                let members = data.groups[i].members;
-                for(let j = 0; j < members.length; j++){
-                    if(username == members[j]){
-                        data.groups[i].role = 0;
-                        groups.push(data.groups[i]);
-                    }
-                }
-            }
+        //     // Check for membership
+        //     for(let i = 0; i < data.length; i++){
+        //         let members = data[i].members;
+        //         for(let j = 0; j < members.length; j++){
+        //             if(username == members[j]){
+        //                 data[i].role = 0;
+        //                 groups.push(data[i]);
+        //             }
+        //         }
+        //     }
 
-            // Grab the channels for each group
-            for(let i = 0; i < groups.length; i++){
-                let channels = getChannels(username, groups[i], groups[i].permissions);
-                groups[i].channels = channels;
-            }
+        //     // Grab the channels for each group
+        //     for(let i = 0; i < groups.length; i++){
+        //         let channels = getChannels(username, groups[i], groups[i].permissions);
+        //         groups[i].channels = channels;
+        //     }
         }
         return groups;
     }

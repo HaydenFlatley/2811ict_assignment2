@@ -17,7 +17,14 @@ const httpOptions = {
 export class GroupService {
   private api:string = 'http://localhost:3000/api/';
 
-  constructor(private http:HttpClient) {}
+  constructor(private http:HttpClient) {
+    this.initDb(0);
+  }
+
+  initDb(data){
+    let body = undefined;
+    return this.http.post(this.api + 'db/install', body, httpOptions);
+  }
 
   createGroup(data){
     let body = JSON.stringify(data);
