@@ -3,35 +3,53 @@
 // the data that is presented.
 // ============================================
 
-module.exports = function(){
-    this.data;
-
+module.exports = function(MongoClient, dbURL){
     this.findUserLogin = function(username, password){
-        console.log("IN FINDUSERLOGIN", this.data);
-        let match = false;
-        let users = data.users;
-        for(let i = 0; i < users.length; i++){
-            if(users[i].username == username){
-                if(users[i].password == password){
-                    match = users[i];
+        return MongoClient.connect(dbURL, { useNewUrlParser: true }, function(err, db){
+            if(err) throw err;
+            let dbo = db.db("chat");
+            return dbo.collection("users").find({'name':username}).toArray(function(err, result) {
+                console.log("GOT HERE");
+                if (err) throw err;
+                let match = false;
+                if (result[0].password == password){
+                    match = {
+                        "name": data[0].name,
+                        "permissions": data[0].permissions,
+                        "groups": [],
+                    }
+                    console.log("Password correct!");
                 }else{
-                    console.log("wrong password");
+                    console.log("Password WRONG");
                 }
-                
-            }
-        }
-        return match;
+                console.log("MATCH", match);
+                return match;
+            });
+        });
+
     }
 
     this.findUser = function(username){
         let match = false;
         let users = data;
-        for(let i = 0; i < users.length; i++){
-            if(users[i].username == username){
-                match = users[i];
-            }
-        }
-        return match;
+
+        MongoClient.connect(dbURL, { useNewUrlParser: true }, function(err, db){
+            let dbo = db.db("chat");
+            dbo.collection("users").find({}).toArray(function(err, result) {
+                //console.log("GOT THE USERS: ",result);
+                for(let i = 0; i < result.length; i++){
+                    if(result[i].name == username){
+                        match = result[i];
+                    }
+                }
+             });
+            
+            console.log("DFNSKJLVNDJKVLNDSJKV",match);
+            return match;
+
+       });
+
+        
     }
 
     this.setUserData = function(data){

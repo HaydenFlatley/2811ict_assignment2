@@ -126,84 +126,57 @@ app.get('/db/install', function(req, res){
 });
 
 // Login Module
-const login = require('./login.js')();
+const login = require('./login.js')(MongoClient, dbURL);
 const groups = require('./groups.js')(MongoClient, dbURL);
 const users = require('./users.js')();
 
 app.post('/api/login', function(req, res){
+        let username = req.body.username; 
+        let password = req.body.password;
+
         MongoClient.connect(dbURL, { useNewUrlParser: true }, function(err, db){
-            let username = req.body.username; 
-            let password = req.body.password;
             if(err) throw err;
             let dbo = db.db("chat");
-            dbo.collection("users").find({'name':username}).toArray(function(err, result) {
-            if (err) throw err;
-            data = result;
-            db.close();
-            login.data = data;
 
-            let match = false;
-            if (data[0].password == password){
-                match = {
-                    "name": data[0].name,
-                    "permissions": data[0].permissions,
+            dbo.collection("users").find({'username':username}).toArray(function(err, result) {
+
+                if (err) throw err;
+                let data = result[0];
+            
+                let match = false;
+                if (data.password == password){
+                    match = data;
+                    for (let i = 0; i < match.groups.length; i++){
+                        match.groups[i].role = 0; 
+                    }
+                    groups.groupData = data;
+                    console.log("Password correct!");
+                }else{
+                    console.log("Password WRONG");
                 }
-                console.log("Password correct!");
-            }else{
-                console.log("Password WRONG");
-            }
 
-            if(match !== false){
-                groups.getData();
-                match.groups = groups.getGroups(username, match.permissions);
-                //console.log(match.groups[0].channels[0]);
-            }
-            console.log("MATCH IS ",match);
-           
-            res.send(match);
 
-            });
-        });
+                console.log(match);
+                
+                res.send(match);
+                
+       });
+    });
+
         
-        //
 });
 
 
 // Group APIs
 app.post('/api/groups', function(req,res){
-    // We want to authenticate again -- usually you'd use a token
-    fs.readFile(dataFile, dataFormat, function(err, data){
-        data = JSON.parse(data);
-        let username = req.body.username; 
-        login.data = data;
-        let match = login.findUser(username);
-        
-        // Check to see if we got a match, get groups if true
-        if(match !== false){
-            groups.data = data;
-            match.groups = groups.getGroups(username, match.permissions);
-        }
-        res.send(match);
-    });
+    let username = req.body.username;
+    let groups = group.getGroups(username, res);
 });
 
 app.post('/api/channels', function(req,res){
-    // We want to authenticate again -- usually you'd use a token
-    fs.readFile(dataFile, dataFormat, function(err, data){
-        data = JSON.parse(data);
-        let username = req.body.username;
-        let group = req.body.group; 
-        login.data = data;
-        let match = login.findUser(username);
-        console.log(data);
-        // Check to see if we got a match, get groups if true
-        if(match !== false){
-            console.log("Match"+match.username);
-            groups.data = data;
-            match.channels = groups.getChannels(username, group, match.permissions);
-        }
-        res.send(match);
-    });
+    let username = req.body.username;
+    let group = req.body.group;
+    groups.getChannels(username, group, res);
 });
 
 app.delete('/api/group/delete/:groupname', function(req, res){

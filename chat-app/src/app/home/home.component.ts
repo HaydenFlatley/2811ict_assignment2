@@ -27,8 +27,9 @@ export class HomeComponent implements OnInit {
     } else {
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.user = user;
-      console.log(this.user);
+      console.log("FROM HOME",this.user);
       this.groups = user.groups;
+      console.log("THIS GROUPS",this.groups);
       if(this.groups.length > 0){
         this.openGroup(this.groups[0].name);
         if(this.groups[0].channels > 0){
@@ -90,6 +91,7 @@ export class HomeComponent implements OnInit {
   }
 
   getGroups(){
+    console.log("Getting groups");
     let data = {
       'username': JSON.parse(sessionStorage.getItem('user')).username
     }
@@ -106,15 +108,16 @@ export class HomeComponent implements OnInit {
   }
 
   getChannels(groupName){
+    console.log("Getting channels");
     let data = {
       'username': JSON.parse(sessionStorage.getItem('user')).username,
-      'group': this.selectedGroup.name
+      'group': groupName
     }
     this._groupService.getChannels(data).subscribe(
       d=>{
         console.log('getChannels()');
         console.log(d);
-        this.channels = d['channels'];
+        this.channels = d[0];
       }, 
       error => {
         console.error(error);
@@ -133,9 +136,10 @@ export class HomeComponent implements OnInit {
       if(this.groups[i].name == name){
         this.selectedGroup = this.groups[i];
       }
+      this.getChannels(this.selectedGroup.name);
     }
-    this.getChannels(this.selectedGroup.name);
   }
+
 
 
   // Responsible for handling the event call by the child component
@@ -143,7 +147,7 @@ export class HomeComponent implements OnInit {
 
     let found:boolean = false;
     for(let i = 0; i < this.channels.length; i++){
-      if(this.channels[i].name == name){
+      if(this.channels[i] == name){
         this.selectedChannel = this.channels[i];
         found = true;
       }

@@ -32,6 +32,7 @@ export class LoginComponent implements OnInit {
     this._userService.login(user).subscribe(
       data => { 
         if(data != false){
+          console.log("FROM LOGIN", data);
           let temp = JSON.stringify(data);
           sessionStorage.setItem('user', temp);         
           this.router.navigate(['/home']); 

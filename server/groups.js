@@ -4,46 +4,38 @@
 // responsibilities
 // ============================================
 module.exports = function(MongoClient, dbURL){
-    this.MongoClient = MongoClient;
-    this.dbURL = dbURL;
+    //this.MongoClient = MongoClient;
+    //this.dbURL = dbURL;
     this.username;
-    this.data;
+    this.groupData;
     
-    this.getData = function(){
-        this.MongoClient.connect(this.dbURL, { useNewUrlParser: true }, function(err, db){
-        console.log("IN HERE!!");
-        let dbo = db.db("chat");
-        dbo.collection("groups").find({}).toArray(function(err, result) {
-            console.log("GROUPYGRPUU", result);
-            this.data = result;
-         });
-        });
-    }
     // Find and delete a group by matching groupName to available data in this.data
     this.deleteGroup = function(groupName){
         let found = false;
         //console.log(this.data);
-        for(let i = 0; i < this.data.length; i++){
-            if(this.data[i].name == groupName){
+        for(let i = 0; i < this.groupData.length; i++){
+            if(this.groupData[i].name == groupName){
                 found = true;
-                this.data.splice(i, 1);
-                return this.data
+                this.groupData.splice(i, 1);
+                return this.groupData
             }
         }
         return found;
     }
 
     // Return all groups where the username exists (or according to role)
-    this.getGroups = function(username, role = 0){
+    this.getGroups = function(username, res, role = 0){
         let groups = [];
-        //console.log(role);
-
+        console.log("ROLE",role);
+        role = 2;
         if(role == 2){
             // Just return every group and every channel
-            for(let i = 0; i < data.length; i++){
-                let group = data[i];
-                group.channels = this.getChannels(username, group.group, role);
-                group.role = 2;
+            for(let i = 0; i < this.groupData.length; i++){
+                let group = this.groupData[i];
+                console.log("getting channels");
+                group.channels = this.groupData.groups[i].channels;
+                group.role = 0;
+                console.log("NEW GROUP", group)
                 groups.push(group);
             }
         // } else {   
@@ -75,24 +67,26 @@ module.exports = function(MongoClient, dbURL){
         //         groups[i].channels = channels;
         //     }
         }
-        return groups;
+        console.log("from get groups", groups);
+        res.send(groups);
     }
 
     // Get all the channels a user has access for a given group and role
-    this.getChannels = function(username, group, role){
+    this.getChannels = function(username, group, res){
         let channels = [];
-        console.log("GROUP NAME : "+ group);
+        role = 2;
         // Go through all the channels
-        for(let i = 0; i < data.channels.length; i++){
+        for(let i = 0; i < this.groupData.groups.length; i++){
             //remove later
             // Check to see if the channel matches the current group
-            if(data.channels[i].group == group){
+            if(this.groupData.groups[i].name == group){
                 //channels.push(data.channels[i]);
+                //TEMPRORARY
                 if(role >= 2 || group.role >= 1){
-                    channels.push(data.channels[i]);
+                    channels.push(this.groupData.groups[i].channels);
                 } else {
                     // Channel belongs to group, check for access
-                    let channel = data.channels[i];
+                    let channel = this.groupData.groups[i].channels;
                     for(let j = 0; j < channel.members.length; j++){
                         if(username == channel.members[j]){
                             channels.push(channel);
@@ -102,8 +96,7 @@ module.exports = function(MongoClient, dbURL){
             }
         }
 
-        console.log(channels);
-        return channels;
+        res.send(channels)
     }
     return this;
 }
