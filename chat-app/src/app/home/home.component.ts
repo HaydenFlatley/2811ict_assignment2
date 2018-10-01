@@ -12,7 +12,7 @@ export class HomeComponent implements OnInit {
   public user;
   public selectedGroup;
   public selectedChannel;
-  public groups = [];
+  public groups;
   public channels = [];
   public newGroupName:String;
   public newChannelName:String;
@@ -41,7 +41,8 @@ export class HomeComponent implements OnInit {
 
   createGroup(event){
     event.preventDefault();
-    let data = {'newGroupName': this.newGroupName};
+    let data = {'username':this.user.name, 'newGroupName': this.newGroupName};
+    console.log(data);
     this._groupService.createGroup(data).subscribe(
       data => { 
         console.log(data);
@@ -56,7 +57,7 @@ export class HomeComponent implements OnInit {
 
   createChannel(event){
     event.preventDefault();
-    let data = {'newChannelName': this.newChannelName, 'groupName': this.selectedGroup.name};
+    let data = {'newChannelName': this.newChannelName, 'groupName': this.selectedGroup.name, 'username':this.user.name};
     this._groupService.createChannel(data).subscribe(
       data => { 
         console.log(data);
@@ -70,6 +71,7 @@ export class HomeComponent implements OnInit {
 
   createUser(event){
     let data = {'username': this.newUserName, 'group': this.selectedGroup.name, 'channel': this.selectedChannel.name}
+    console.log(data);
     this._userService.create(data).subscribe(
       data => {
         console.log(data);
@@ -93,13 +95,14 @@ export class HomeComponent implements OnInit {
   getGroups(){
     console.log("Getting groups");
     let data = {
-      'username': JSON.parse(sessionStorage.getItem('user')).username
+      'username': JSON.parse(sessionStorage.getItem('user')).name
     }
     this._groupService.getGroups(data).subscribe(
       d=>{
         console.log('getGroups()');
         console.log(d);
-        this.groups = d['groups'];
+        this.groups = d;
+        console.log("GGRRPUPS", this.groups);
       }, 
       error => {
         console.error(error);
@@ -110,13 +113,13 @@ export class HomeComponent implements OnInit {
   getChannels(groupName){
     console.log("Getting channels");
     let data = {
-      'username': JSON.parse(sessionStorage.getItem('user')).username,
+      'username': JSON.parse(sessionStorage.getItem('user')).name,
       'group': groupName
     }
     this._groupService.getChannels(data).subscribe(
       d=>{
         console.log('getChannels()');
-        console.log(d);
+        console.log("WHAT GET CHANNELS GIVES", d);
         this.channels = d[0];
       }, 
       error => {
@@ -147,7 +150,7 @@ export class HomeComponent implements OnInit {
 
     let found:boolean = false;
     for(let i = 0; i < this.channels.length; i++){
-      if(this.channels[i] == name){
+      if(this.channels[i].name == name){
         this.selectedChannel = this.channels[i];
         found = true;
       }

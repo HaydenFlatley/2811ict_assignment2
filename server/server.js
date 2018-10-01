@@ -133,13 +133,13 @@ const users = require('./users.js')();
 app.post('/api/login', function(req, res){
         let username = req.body.username; 
         let password = req.body.password;
-
+        
         MongoClient.connect(dbURL, { useNewUrlParser: true }, function(err, db){
             if(err) throw err;
             let dbo = db.db("chat");
 
-            dbo.collection("users").find({'username':username}).toArray(function(err, result) {
-
+            dbo.collection("users").find({'name':username}).toArray(function(err, result) {
+                console.log(result);
                 if (err) throw err;
                 let data = result[0];
             
@@ -166,11 +166,24 @@ app.post('/api/login', function(req, res){
         
 });
 
+updateGroupData = function(username){
+    MongoClient.connect(dbURL, { useNewUrlParser: true }, function(err, db){
+        if(err) throw err;
+        let dbo = db.db("chat");
+
+        dbo.collection("users").find({'name':username}).toArray(function(err, result) {
+            groups.groupData = result[0];
+        });
+
+    });
+}
+
 
 // Group APIs
 app.post('/api/groups', function(req,res){
+    
     let username = req.body.username;
-    let groups = group.getGroups(username, res);
+    groups.getGroups(username, res);
 });
 
 app.post('/api/channels', function(req,res){
@@ -201,30 +214,33 @@ app.delete('/api/group/delete/:groupname', function(req, res){
 app.post('/api/group/create', function(req, res){
     let writer = require('./write.js')(MongoClient, dbURL);
     let groupName = req.body.newGroupName;
+    let username = req.body.username;
     if(groupName == '' || groupName == 'undefined' || groupName == null){
         res.send(false);
     } else {
             let newGroup = {
                 'name': req.body.newGroupName,
+                'channels': [],
                 'admins':[],
                 'members':[]
             }
-            writer.addGroup(newGroup, res);
+            writer.addGroup(username, newGroup, res);
     }
 })
 
 app.post('/api/channel/create', function(req, res){
     let writer = require('./write.js')(MongoClient, dbURL);
-    let channelName = req.body.newChannelName
+    let channelName = req.body.newChannelName;
+    let groupName = req.body.groupName;
+    let username = req.body.username;
     if(channelName == '' || channelName == 'undefined' || channelName == null){
         res.send(false);
     } else {
             let newChannel = {
-                'name': req.body.newChannelName,
-                'group': req.body.groupName,
-                'members':[]
+                'name': channelName,
+                'members':[username]
             }
-            writer.addChannel(newChannel, res);
+            writer.addChannel(newChannel, groupName, username, res);
     }
 })
 
@@ -239,8 +255,7 @@ app.post('/api/user/create', function(req, res){
     } else {
             let newUser = {
                 'name': username,
-                'group': group,
-                'channel': channel,
+                'groups': [{"name":group, "channels": [{"name":channel, "members":[username]}]}],
                 'permissions': 0,
                 'password': '123',
             }
