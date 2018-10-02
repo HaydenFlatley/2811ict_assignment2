@@ -13,6 +13,8 @@ export class ChannelsComponent implements OnInit {
   @Input() group;
   @Output() channelChanged: EventEmitter<string> = new EventEmitter();
   user:any;
+  prevRoom: string;
+
 
   constructor(private _chatService:ChatService) { }
 
@@ -34,7 +36,16 @@ export class ChannelsComponent implements OnInit {
   }
 
   join(channelName){
+    this.leave();
     this._chatService.joinRoom({user:this.user.name, room:channelName.name});
+    this.prevRoom = channelName.name;
+  }
+
+  leave(){
+    if (this.prevRoom != undefined){
+      this._chatService.leaveRoom({user:this.user.name, room:this.prevRoom});
+    }
+    
   }
 
 }

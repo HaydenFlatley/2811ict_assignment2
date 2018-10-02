@@ -135,6 +135,7 @@ export class HomeComponent implements OnInit {
 
   // Determine which group is currently selected and pass onto the child panel
   openGroup(name){
+    this.getGroups();
     for(let i = 0; i < this.groups.length; i++){
       if(this.groups[i].name == name){
         this.selectedGroup = this.groups[i];

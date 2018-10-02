@@ -11,6 +11,7 @@ export class ChatComponent implements OnInit {
   user:any;
   messages:Array<{user:String,message:String}> = [];
   message:String;
+  prevChannel: string;
   
   constructor(private _chatService:ChatService) { 
     this._chatService.newUserJoined().subscribe(data=> {
@@ -18,8 +19,13 @@ export class ChatComponent implements OnInit {
       console.log("DADADADATA", data);
     });
     this._chatService.newMessageReceived().subscribe(data=> {
+      if (this.channel.name != this.prevChannel){
+        //channel has been changed
+        this.messages = [];
+      }
       this.messages.push(data);
       console.log("DADADADATA", data);
+      this.prevChannel = this.channel.name;
     });
   }
 
