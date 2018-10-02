@@ -36,6 +36,10 @@ export class ChatService {
     return observable;
   }
 
+  leaveRoom(data){
+    
+  }
+
   sendMessage(data){
     this.socket.emit('message',data);
   }
