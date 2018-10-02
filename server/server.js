@@ -5,6 +5,7 @@ const app = express();
 const fs = require('fs');
 const dataFile = './data.json';
 const dataFormat = 'utf8';
+const formidable = require('formidable');
 const MongoClient = require('mongodb').MongoClient;
 const dbURL = "mongodb://localhost:27017/chat"; 
 var server = require('http').Server(app);
@@ -28,6 +29,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Basic Routes
 app.use(express.static(path.join(__dirname, '../angular-app/dist/angular-app')));
+app.use('./images',express.static(path.join(__dirname, './userImages')));
+
 app.get('/', function (req, res) {
     console.log("Setting up initial db state");
     MongoClient.connect(dbURL, function(err, db){

@@ -17,6 +17,8 @@ export class HomeComponent implements OnInit {
   public newGroupName:String;
   public newChannelName:String;
   public newUserName:String;
+  public selectedFile;
+  public profilePhoto;
 
   constructor(private router: Router, private _groupService:GroupService, private _userService:UserService) { }
 
@@ -161,4 +163,15 @@ export class HomeComponent implements OnInit {
     }
   }
   
+  onFileSelected(event){
+    this.selectedFile = event.target.files[0];
+  }
+
+  onUpload(){
+    const fd = new FormData();
+    fd.append('image', this.selectedFile, this.selectedFile.name);
+    this.profilePhoto = this.selectedFile.name;
+
+  }
+
 }
