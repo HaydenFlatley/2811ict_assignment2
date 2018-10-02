@@ -1,4 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import {ChatService} from '../chat.service';
+
 // import { EventEmitter } from 'events';
 
 @Component({
@@ -10,16 +12,29 @@ export class ChannelsComponent implements OnInit {
   @Input() channels;
   @Input() group;
   @Output() channelChanged: EventEmitter<string> = new EventEmitter();
+  user:any;
 
-  constructor() { }
+  constructor(private _chatService:ChatService) { }
 
   ngOnInit() {
+    if(sessionStorage.getItem('user') === null){
+      // User has not logged in, reroute to login
+    } else {
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      this.user = user;
+    }
+    
   }
 
   changeChannel(name){
-    console.log("CHANGING CHANEL", name);
     // console.log("changeChannel("+name+")");
     this.channelChanged.emit(name);
+
+    this.join(name);
+  }
+
+  join(channelName){
+    this._chatService.joinRoom({user:this.user.name, room:channelName.name});
   }
 
 }

@@ -147,15 +147,17 @@ export class HomeComponent implements OnInit {
 
   // Responsible for handling the event call by the child component
   channelChangedHandler(name){
-
+    console.log("Whats being checked ", name);
     let found:boolean = false;
+    this.selectedChannel = name;
     for(let i = 0; i < this.channels.length; i++){
       if(this.channels[i].name == name){
         this.selectedChannel = this.channels[i];
         found = true;
       }
+      console.log("Whats being sent", this.selectedChannel);
+      return found;
     }
-    return found;
   }
   
 }

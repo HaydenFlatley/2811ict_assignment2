@@ -7,7 +7,8 @@ const dataFile = './data.json';
 const dataFormat = 'utf8';
 const MongoClient = require('mongodb').MongoClient;
 const dbURL = "mongodb://localhost:27017/chat"; 
-
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 // CORS
 // We are enabling CORS so that our 'ng serve' Angular server can still access
@@ -267,7 +268,32 @@ app.post('/api/user/create', function(req, res){
 
 
 // HTTP Listener
-app.listen(3000, function(){
+server.listen(3000, function(){
     console.log('Server runing');
 })
+
+
+io.on('connection', (socket)=>{
+    console.log("!!!!!!new connection made");
+
+    socket.on('join', function(data){
+        socket.join(data.room);
+        console.log(data.user + 'joined the room: ' + data.room);
+        socket.broadcast.to(data.room).emit('new user joined',{user:data.user, message:'has joined this room'});
+
+    });
+
+    socket.on('message', function(data){
+        io.in(data.room).emit('new message', {user:data.user, message:data.message});
+
+    });
+
+    socket.on('leave', function(data){
+        console.log(data.user + 'left the room: ' + data.room);
+        socket.broadcast.to(data.room).emit('left room', {user:data.user, message:'has left this room'});
+        socket.leave(data.room);
+    });
+
+});
+
 module.exports = app;
