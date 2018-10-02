@@ -30,7 +30,8 @@ export class UserService {
   }
 
   uploadPhoto(fd){
-    return this.http.post(this.api + 'upload', fd, httpOptions);
+
+    return this.http.post<any>(this.api + 'upload', fd);
   }
 
   delete(username){

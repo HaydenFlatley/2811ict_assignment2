@@ -170,7 +170,12 @@ export class HomeComponent implements OnInit {
   onUpload(){
     const fd = new FormData();
     fd.append('image', this.selectedFile, this.selectedFile.name);
-    this.profilePhoto = this.selectedFile.name;
+    this._userService.uploadPhoto(fd).subscribe(res=>{
+      this.profilePhoto = res.data.filename;
+      
+      console.log(this.profilePhoto);
+    });
+    
 
   }
 

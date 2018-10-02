@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Basic Routes
 app.use(express.static(path.join(__dirname, '../angular-app/dist/angular-app')));
-app.use('./images',express.static(path.join(__dirname, './userImages')));
+app.use('/images',express.static(path.join(__dirname, './userImages')));
 
 app.get('/', function (req, res) {
     console.log("Setting up initial db state");
@@ -266,6 +266,35 @@ app.post('/api/user/create', function(req, res){
             writer.addUser(newUser, res);
     }
 
+});
+
+app.post('/api/upload', function(req,res){
+    var form = new formidable.IncomingForm({uploadDir:"./userImages"});
+    form.keepExtensions = true;
+    form.on('error', function(err){
+        throw err;
+        res.send({
+            result:"failed",
+            data:{},
+            numberOfImages:0,
+            message:"Cannot upload images. Error is :" + err
+        });
+    });
+
+    form.on('fileBegin', function(name, file){
+        file.path = form.uploadDir + "/" + file.name;
+    });
+
+    form.on('file', function(field, file){
+        res.send({
+            result:'OK',
+            data:{'filename': file.name, 'size':file.size},
+            numberOfImages:1,
+            message:"upload succesful"
+        });
+    });
+
+    form.parse(req);
 });
  
 
